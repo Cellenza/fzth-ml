@@ -1,0 +1,16 @@
+# Lib ecrite en C pour des questions de perf
+# Et facilie le calcul matriciel
+numpy
+
+# Lib permettant de manipuler des gros volumes 
+# de donnees en s'appuyant sur Numpy
+pandas
+
+# Lib  permettant de creer des models Machine Learning
+# grace a une API Haut Niveau
+scikit-learn
+
+# Lib permettant de visualiser les donnees au travers
+# different graphe ( scatter , histo , etc....)
+matplotlib
+

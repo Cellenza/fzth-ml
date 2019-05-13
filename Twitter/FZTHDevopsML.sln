@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FZTHDevopsML.TweetSearch", "FZTHDevopsML.TweetSearch\FZTHDevopsML.TweetSearch.csproj", "{E7E65263-D974-43BC-9CF0-246507561CB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FZTHDevopsML.Functions", "FZTHDevopsML.Functions\FZTHDevopsML.Functions.csproj", "{A137B9DE-E0C4-4D4F-AEBB-787C8ED2C594}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E7E65263-D974-43BC-9CF0-246507561CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7E65263-D974-43BC-9CF0-246507561CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7E65263-D974-43BC-9CF0-246507561CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7E65263-D974-43BC-9CF0-246507561CB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A137B9DE-E0C4-4D4F-AEBB-787C8ED2C594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A137B9DE-E0C4-4D4F-AEBB-787C8ED2C594}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A137B9DE-E0C4-4D4F-AEBB-787C8ED2C594}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A137B9DE-E0C4-4D4F-AEBB-787C8ED2C594}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B5CC0F06-C66E-4E32-B42E-95057C242618}
+	EndGlobalSection
+EndGlobal

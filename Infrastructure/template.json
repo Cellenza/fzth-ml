@@ -1,0 +1,240 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "variables": {
+    "prefixLowerCase": "[toLower(resourceGroup().name)]",
+    "website_name": "[concat(variables('prefixLowerCase'), 'ws')]",
+    "ml_name": "[concat(variables('prefixLowerCase'), '-ml')]",
+    "storageaccount_name": "[concat(variables('prefixLowerCase'), 'sto')]",
+    "la_name": "[concat(variables('prefixLowerCase'), '-la')]",
+    "serviceplan_name": "[concat(variables('prefixLowerCase'), '-serviceplan')]",
+    "la_sku": "PerNode",
+    "databricks_workspace_name": "[concat(variables('prefixLowerCase'), '-databricks')]",
+    "workspace_name": "[concat(variables('prefixLowerCase'), '-databricks')]",
+    "datafactory_name": "[concat(variables('prefixLowerCase'), '-datafactory')]",
+    "datafactory_location": "northeurope",
+    "databricks_sku": "Standard",
+    "databricks_managed_ressourcegroup_name": "[concat(subscription().id, '/resourceGroups/', resourceGroup().name,'-databricks')]",
+    "container_registry": "[concat(variables('prefixLowerCase'), 'registry')]"
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "name": "[variables('container_registry')]",
+      "apiVersion": "2017-10-01",
+      "location": "westeurope",
+      "tags": {},
+      "scale": null,
+      "properties": {
+        "adminUserEnabled": true
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Databricks/workspaces",
+      "name": "[variables('databricks_workspace_name')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-04-01",
+      "sku": {
+        "name": "[variables('databricks_sku')]"
+      },
+      "properties": {
+        "ManagedResourceGroupId": "[variables('databricks_managed_ressourcegroup_name')]"
+      }
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "name": "[variables('datafactory_name')]",
+      "location": "[variables('datafactory_location')]",
+      "type": "Microsoft.DataFactory/factories",
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+
+    {
+      "type": "microsoft.insights/components",
+      "kind": "other",
+      "name": "[variables('website_name')]",
+      "apiVersion": "2015-05-01",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "scale": null,
+      "properties": {
+        "Application_Type": "other",
+        "Flow_Type": "Redfield",
+        "Request_Source": "IbizaAIExtension",
+        "HockeyAppId": null,
+        "SamplingPercentage": null
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "microsoft.operationalinsights/workspaces",
+      "name": "[variables('la_name')]",
+      "apiVersion": "2015-11-01-preview",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+        "source": "Azure",
+
+        "sku": {
+          "name": "[variables('la_sku')]"
+        },
+        "retentionInDays": 30
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+        "name": "Standard_RAGRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "name": "[variables('storageaccount_name')]",
+      "apiVersion": "2018-07-01",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "scale": null,
+      "properties": {
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
+          "defaultAction": "Allow"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "enabled": true
+            },
+            "blob": {
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "sku": {
+        "name": "P1v2",
+        "tier": "PremiumV2",
+        "size": "P1v2",
+        "family": "Pv2",
+        "capacity": 1
+      },
+      "kind": "linux",
+      "name": "[variables('serviceplan_name')]",
+      "apiVersion": "2016-09-01",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+        "name": "[variables('serviceplan_name')]",
+        "workerTierName": null,
+        "adminSiteName": null,
+        "hostingEnvironmentProfile": null,
+        "perSiteScaling": false,
+        "reserved": true,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "kind": "app,linux",
+      "name": "[variables('website_name')]",
+      "apiVersion": "2016-08-01",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "name": "[concat(variables('website_name'),'.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "virtualIP": null,
+            "thumbprint": null,
+            "toUpdate": null,
+            "hostType": "Standard"
+          },
+          {
+            "name": "[concat(variables('website_name'),'.scm.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "virtualIP": null,
+            "thumbprint": null,
+            "toUpdate": null,
+            "hostType": "Repository"
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('serviceplan_name'))]",
+        "reserved": true,
+        "siteConfig": {
+          "appCommandLine": "",
+          "linuxFxVersion": "DOCKER|nginx",
+          "appSettings": [
+          {
+            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+            "value": "[reference(resourceId('microsoft.insights/components/', variables('website_name')), '2015-05-01').InstrumentationKey]"
+          },
+          {
+            "name":"STORAGEACCOUNT_CONTAINER_NAME",
+            "value" :"output"
+          },
+          {
+            "name": "STORAGEACCOUNT_NAME",
+            "value": "[variables('storageaccount_name')]"
+          },
+          {
+            "name": "STORAGEACCOUNT_KEY",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageaccount_name')), '2015-05-01-preview').key1]"
+          },
+          {
+            "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+            "value": "false"
+          },
+          {
+            "name": "DOCKER_REGISTRY_SERVER_URL",
+            "value": "[concat('https://',variables('container_registry'),'.azurecr.io')]"
+          },
+          {
+            "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+            "value": "[variables('container_registry')]"
+          },
+          {
+            "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries',variables('container_registry')),'2017-03-01').passwords[0].value]"
+          }
+        ]
+      },
+        "scmSiteAlsoStopped": false,
+        "hostingEnvironmentProfile": null,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "cloningInfo": null,
+        "httpsOnly": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('serviceplan_name'))]",
+        "[resourceId('microsoft.insights/components/', variables('website_name'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccount_name'))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('container_registry'))]"
+
+      ]
+    }
+  ]
+}
